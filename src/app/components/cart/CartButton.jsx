@@ -106,6 +106,7 @@ export default function CartButton() {
         <div className="space-y-2">
           <Link
             href="/cart"
+            onClick={handleCloseCart}
             className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
           >
             إتمام الطلب
