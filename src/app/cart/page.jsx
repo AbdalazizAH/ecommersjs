@@ -25,6 +25,14 @@ export default function CartPage() {
 
   const { incrementOrdersCount } = useOrders();
 
+  const [fieldErrors, setFieldErrors] = useState({
+    CustomerName: "",
+    CustomerPhone: "",
+    Email: "",
+    Address: "",
+    City: "",
+  });
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -35,7 +43,7 @@ export default function CartPage() {
   const validateForm = () => {
     const errors = {};
 
-    // Validate CustomerName (2-100 characters)
+    // Validate CustomerName
     if (
       formData.CustomerName.length < 2 ||
       formData.CustomerName.length > 100
@@ -43,7 +51,7 @@ export default function CartPage() {
       errors.CustomerName = "يجب أن يكون الاسم بين 2 و 100 حرف";
     }
 
-    // Validate CustomerPhone (10-15 digits, can start with +)
+    // Validate CustomerPhone
     const phoneRegex = /^\+?[0-9]{10,15}$/;
     if (!phoneRegex.test(formData.CustomerPhone)) {
       errors.CustomerPhone = "يجب إدخال رقم هاتف صحيح (10-15 رقم)";
@@ -57,11 +65,13 @@ export default function CartPage() {
       }
     }
 
-    // Validate Address (5-500 characters)
+    // Validate Address
     if (formData.Address.length < 5 || formData.Address.length > 500) {
       errors.Address = "يجب أن يكون العنوان بين 5 و 500 حرف";
     }
 
+    // Update field errors state
+    setFieldErrors(errors);
     return errors;
   };
 
@@ -70,7 +80,7 @@ export default function CartPage() {
     const errors = validateForm();
 
     if (Object.keys(errors).length > 0) {
-      setToastMessage(Object.values(errors)[0]);
+      setToastMessage("يرجى تصحيح الأخطاء في النموذج");
       setToastType("error");
       setShowToast(true);
       return;
@@ -159,12 +169,21 @@ export default function CartPage() {
                   type="text"
                   name="CustomerName"
                   required
-                  className="w-full border rounded-lg px-4 py-2"
+                  className={`w-full border rounded-lg px-4 py-2 ${
+                    fieldErrors.CustomerName
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
                   value={formData.CustomerName}
                   onChange={handleChange}
                   minLength={2}
                   maxLength={100}
                 />
+                {fieldErrors.CustomerName && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.CustomerName}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">رقم الهاتف</label>
@@ -172,11 +191,19 @@ export default function CartPage() {
                   type="tel"
                   name="CustomerPhone"
                   required
-                  className="w-full border rounded-lg px-4 py-2"
+                  className={`w-full border rounded-lg px-4 py-2 ${
+                    fieldErrors.CustomerPhone
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
                   value={formData.CustomerPhone}
                   onChange={handleChange}
-                  pattern="\+?[0-9]{10,15}"
                 />
+                {fieldErrors.CustomerPhone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.CustomerPhone}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">
@@ -185,11 +212,17 @@ export default function CartPage() {
                 <input
                   type="email"
                   name="Email"
-                  required
-                  className="w-full border rounded-lg px-4 py-2"
+                  className={`w-full border rounded-lg px-4 py-2 ${
+                    fieldErrors.Email ? "border-red-500" : "border-gray-300"
+                  }`}
                   value={formData.Email}
                   onChange={handleChange}
                 />
+                {fieldErrors.Email && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.Email}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">العنوان</label>
@@ -197,10 +230,19 @@ export default function CartPage() {
                   type="text"
                   name="Address"
                   required
-                  className="w-full border rounded-lg px-4 py-2"
+                  className={`w-full border rounded-lg px-4 py-2 ${
+                    fieldErrors.Address ? "border-red-500" : "border-gray-300"
+                  }`}
                   value={formData.Address}
                   onChange={handleChange}
+                  minLength={5}
+                  maxLength={500}
                 />
+                {fieldErrors.Address && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {fieldErrors.Address}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-gray-700 mb-2">المدينة</label>
