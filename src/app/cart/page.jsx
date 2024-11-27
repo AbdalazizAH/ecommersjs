@@ -32,8 +32,50 @@ export default function CartPage() {
     }));
   };
 
+  const validateForm = () => {
+    const errors = {};
+
+    // Validate CustomerName (2-100 characters)
+    if (
+      formData.CustomerName.length < 2 ||
+      formData.CustomerName.length > 100
+    ) {
+      errors.CustomerName = "يجب أن يكون الاسم بين 2 و 100 حرف";
+    }
+
+    // Validate CustomerPhone (10-15 digits, can start with +)
+    const phoneRegex = /^\+?[0-9]{10,15}$/;
+    if (!phoneRegex.test(formData.CustomerPhone)) {
+      errors.CustomerPhone = "يجب إدخال رقم هاتف صحيح (10-15 رقم)";
+    }
+
+    // Validate Email if provided
+    if (formData.Email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.Email)) {
+        errors.Email = "يرجى إدخال بريد إلكتروني صحيح";
+      }
+    }
+
+    // Validate Address (5-500 characters)
+    if (formData.Address.length < 5 || formData.Address.length > 500) {
+      errors.Address = "يجب أن يكون العنوان بين 5 و 500 حرف";
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errors = validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      setToastMessage(Object.values(errors)[0]);
+      setToastType("error");
+      setShowToast(true);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -120,6 +162,8 @@ export default function CartPage() {
                   className="w-full border rounded-lg px-4 py-2"
                   value={formData.CustomerName}
                   onChange={handleChange}
+                  minLength={2}
+                  maxLength={100}
                 />
               </div>
               <div>
@@ -131,6 +175,7 @@ export default function CartPage() {
                   className="w-full border rounded-lg px-4 py-2"
                   value={formData.CustomerPhone}
                   onChange={handleChange}
+                  pattern="\+?[0-9]{10,15}"
                 />
               </div>
               <div>
