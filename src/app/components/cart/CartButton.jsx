@@ -3,14 +3,47 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "../../contexts/CartContext";
+import { removeFromCart, clearCart } from "../../lib/cartService";
+import Toast from "../ui/Toast";
 
 export default function CartButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const { cart, isLoading } = useCart();
+  const { cart, isLoading, updateCart } = useCart();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   const handleToggleCart = () => setIsOpen((prev) => !prev);
   const handleCloseCart = () => setIsOpen(false);
   const handleClickOutside = () => setIsOpen(false);
+
+  const handleRemoveItem = async (productId) => {
+    try {
+      const updatedCart = await removeFromCart(productId);
+      updateCart(updatedCart);
+      setToastMessage("تم حذف المنتج من السلة");
+      setToastType("success");
+      setShowToast(true);
+    } catch (error) {
+      setToastMessage("حدث خطأ أثناء حذف المنتج");
+      setToastType("error");
+      setShowToast(true);
+    }
+  };
+
+  const handleClearCart = async () => {
+    try {
+      const emptyCart = await clearCart();
+      updateCart(emptyCart);
+      setToastMessage("تم تفريغ السلة بنجاح");
+      setToastType("success");
+      setShowToast(true);
+    } catch (error) {
+      setToastMessage("حدث خطأ أثناء تفريغ السلة");
+      setToastType("error");
+      setShowToast(true);
+    }
+  };
 
   const CartItemComponent = ({ item }) => (
     <div className="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50">
@@ -36,6 +69,25 @@ export default function CartButton() {
           </span>
         </div>
       </div>
+      <button
+        onClick={() => handleRemoveItem(item.ProductId)}
+        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors"
+        aria-label="حذف من السلة"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
+        </svg>
+      </button>
     </div>
   );
 
@@ -51,12 +103,20 @@ export default function CartButton() {
           <span>المجموع الكلي:</span>
           <span>{cart.TotalAmount.toFixed(2)} دينار</span>
         </div>
-        <Link
-          href="/cart"
-          className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-        >
-          إتمام الطلب
-        </Link>
+        <div className="space-y-2">
+          <Link
+            href="/cart"
+            className="block w-full bg-blue-600 text-white text-center py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            إتمام الطلب
+          </Link>
+          <button
+            onClick={handleClearCart}
+            className="block w-full bg-red-100 text-red-600 text-center py-3 rounded-lg hover:bg-red-200 transition-colors font-semibold"
+          >
+            تفريغ السلة
+          </button>
+        </div>
       </div>
     </>
   );
@@ -162,6 +222,14 @@ export default function CartButton() {
             </div>
           </div>
         </>
+      )}
+
+      {showToast && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
       )}
     </div>
   );
