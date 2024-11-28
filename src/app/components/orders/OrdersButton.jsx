@@ -1,34 +1,25 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getOrders } from "../../lib/cartService";
 import { useOrders } from "../../contexts/OrdersContext";
 
 export default function OrdersButton() {
   const [isOpen, setIsOpen] = useState(false);
-  const { ordersCount, updateOrdersCount } = useOrders();
-  const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { ordersCount, orders, refreshOrders } = useOrders();
 
   const handleToggleOrders = () => setIsOpen((prev) => !prev);
   const handleCloseOrders = () => setIsOpen(false);
   const handleClickOutside = () => setIsOpen(false);
 
   useEffect(() => {
-    async function fetchOrders() {
-      try {
-        const ordersData = await getOrders();
-        setOrders(ordersData);
-        updateOrdersCount(ordersData.length);
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    async function loadOrders() {
+      setIsLoading(true);
+      await refreshOrders();
+      setIsLoading(false);
     }
-
-    fetchOrders();
-  }, [updateOrdersCount]);
+    loadOrders();
+  }, [refreshOrders]);
 
   const OrderStatus = ({ status }) => {
     const statusColors = {

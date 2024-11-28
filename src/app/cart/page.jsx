@@ -23,7 +23,7 @@ export default function CartPage() {
     Notes: "",
   });
 
-  const { incrementOrdersCount } = useOrders();
+  const { incrementOrdersCount, refreshOrders } = useOrders();
 
   const [fieldErrors, setFieldErrors] = useState({
     CustomerName: "",
@@ -94,7 +94,10 @@ export default function CartPage() {
       setToastType("success");
       setShowToast(true);
       updateCart(null);
-      incrementOrdersCount();
+
+      // تحديث الطلبات مباشرة
+      await refreshOrders();
+
       router.push("/orders");
     } catch (error) {
       setToastMessage("حدث خطأ أثناء إرسال الطلب");
